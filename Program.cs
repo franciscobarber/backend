@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RetailDemo.Data;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using RetailDemo.Models;
 
