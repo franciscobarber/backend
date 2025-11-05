@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RetailDemo.Data;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using RetailDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,8 +68,7 @@ if (!app.Environment.IsDevelopment())
         }
         catch (Exception ex)
         {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred during database migration.");
+            services.GetRequiredService<ILogger<Program>>().LogError(ex, "An error occurred during database migration.");
         }
     }
 }
