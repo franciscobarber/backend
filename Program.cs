@@ -11,9 +11,9 @@ builder.WebHost.UseUrls("http://*:8080");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configure DbContext for Azure SQL
+// Use In-Memory Database for the main application
 builder.Services.AddDbContext<RetailDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSql")));
+    options.UseInMemoryDatabase("RetailDb"));
 
 var app = builder.Build();
 
@@ -37,10 +37,14 @@ app.MapGet("/", async (RetailDbContext db) =>
     return Results.Ok(new { Products = products, Orders = orders });
 });
 
-app.MapGet("/conn", async (RetailDbContext db, ILogger<Program> logger) =>
+app.MapGet("/conn", async (IConfiguration config, ILogger<Program> logger) =>
 {
     try
     {
+        var options = new DbContextOptionsBuilder<RetailDbContext>()
+            .UseSqlServer(config.GetConnectionString("AzureSql"))
+            .Options;
+        await using var db = new RetailDbContext(options);
         var canConnect = await db.Database.CanConnectAsync();
         return canConnect
             ? Results.Ok("Connection to the database succeeded!")
