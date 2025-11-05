@@ -11,11 +11,18 @@ builder.WebHost.UseUrls("http://*:8080");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Use In-Memory Database for the main application
+// Use Azure SQL Database
 builder.Services.AddDbContext<RetailDbContext>(options =>
-    options.UseInMemoryDatabase("RetailDb"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSql")));
 
 var app = builder.Build();
+
+// Apply migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<RetailDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 // Configure middleware
 if (app.Environment.IsDevelopment())
@@ -39,13 +46,11 @@ app.MapGet("/", async (RetailDbContext db) =>
 
 app.MapGet("/conn", async (IConfiguration config, ILogger<Program> logger) =>
 {
-    var connectionString = config.GetConnectionString("AzureSql");
-    var responseMessage = $"Attempting to connect with connection string: '{connectionString}'\n\n";
+    var connectionString = config.GetConnectionString("AzureSql");    
 
     try
     {
         var options = new DbContextOptionsBuilder<RetailDbContext>()
-            .UseSqlServer(config.GetConnectionString("AzureSql"))
             .UseSqlServer(connectionString)
             .Options;
         await using var db = new RetailDbContext(options);
@@ -54,15 +59,11 @@ app.MapGet("/conn", async (IConfiguration config, ILogger<Program> logger) =>
             ? Results.Ok("Connection to the database succeeded!")
             : Results.Problem("Connection to the database failed.");
 
-        responseMessage += canConnect ? "Connection established!" : "Connection failed.";
-        return Results.Ok(responseMessage);
     }
     catch (Exception ex)
     {
         logger.LogError(ex, "Connection to the database failed.");
         return Results.Problem($"An exception occurred while connecting to the database: {ex.Message}");
-        responseMessage += $"Connection failed with an error: {ex.Message}";
-        return Results.Problem(responseMessage);
     }
 });
 
