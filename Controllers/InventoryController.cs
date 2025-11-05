@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RetailDemo.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace RetailDemo.Controllers
 {
@@ -13,12 +14,17 @@ namespace RetailDemo.Controllers
             _context = context;
         }
 
-        [HttpGet("{productName}")]
-        public IActionResult GetStock(string productName)
+        [HttpGet("{productId}")]
+        public async Task<IActionResult> GetStock(Guid productId)
         {
-            var item = _context.InventoryItems.FirstOrDefault(i => i.ProductName == productName);
-            if (item == null) return NotFound();
-            return Ok(item.Stock);
+            var item = await _context.InventoryItems
+                .FirstOrDefaultAsync(i => i.ProductId == productId);
+
+            if (item == null)
+            {
+                return NotFound($"No inventory record found for product ID {productId}");
+            }
+            return Ok(new { productId = item.ProductId, stock = item.Stock });
         }
     }
 }
