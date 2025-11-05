@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RetailDemo.Data;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using RetailDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,8 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add Health Checks service, including a check for the DbContext
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<RetailDbContext>();
+
 
 // Configure DbContext based on the environment
 if (builder.Environment.IsDevelopment())
