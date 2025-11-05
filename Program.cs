@@ -43,6 +43,14 @@ app.MapControllers();
 // Map the health check endpoint
 app.MapHealthChecks("/healthz");
 
+// Map root endpoint to display table contents
+app.MapGet("/", async (RetailDbContext db) =>
+{
+    var products = await db.Products.ToListAsync();
+    var orders = await db.Orders.ToListAsync();
+    return Results.Ok(new { Products = products, Orders = orders });
+});
+
 // Apply migrations automatically only in production
 if (!app.Environment.IsDevelopment())
 {
