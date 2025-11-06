@@ -26,20 +26,16 @@ namespace RetailDemo.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProducts()
         {
-            // Try to get the list of products from the cache
-            if (!_cache.TryGetValue(ProductsCacheKey, out List<Product> products))
+            var products = await _cache.GetOrCreateAsync(ProductsCacheKey, async entry =>
             {
-                // If the products are not in the cache, get them from the database
-                products = await _context.Products.ToListAsync();
-
                 // Configure cache options
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(5)) // Keep in cache, reset expiration on access
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(30)); // Remove from cache after this time
-
-                // Save the data in the cache
-                _cache.Set(ProductsCacheKey, products, cacheEntryOptions);
-            }
+                entry.SetSlidingExpiration(TimeSpan.FromMinutes(5)); // Keep in cache, reset expiration on access
+                entry.SetAbsoluteExpiration(TimeSpan.FromMinutes(30)); // Remove from cache after this time
+ 
+                // If the products are not in the cache, get them from the database
+                return await _context.Products.ToListAsync();
+            });
+ 
             return Ok(products);
         }
     }
