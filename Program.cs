@@ -1,11 +1,15 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using RetailDemo.Data;
-using Microsoft.Extensions.DependencyInjection;
 using RetailDemo.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
 builder.Services.AddControllers();
 builder.WebHost.UseUrls("http://*:8080");
 builder.Services.AddEndpointsApiExplorer();
@@ -33,6 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

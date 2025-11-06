@@ -19,13 +19,28 @@ namespace RetailDemo.Models
     }
 
 
-    public class Order
-    {
-        public Guid Id { get; set; }
-        public required string CustomerName { get; set; }
-        public DateTime OrderDate { get; set; }
-        public decimal TotalAmount { get; set; }
-    }
+public class Order
+{
+    public int Id { get; set; }
+    public string? UserId { get; set; } // Add this property
+    public DateTime OrderDate { get; set; }
+    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+}
+
+public class OrderItem
+{
+    public int Id { get; set; }
+    public int Quantity { get; set; }
+    public decimal Price { get; set; }
+
+    // Foreign Key to Order
+    public int OrderId { get; set; }
+    public Order Order { get; set; } = null!;
+
+    // Foreign Key to Product
+    public Guid ProductId { get; set; }
+    public Product Product { get; set; } = null!;
+}
 
     public class Recommendation
     {

@@ -1,10 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using RetailDemo.Data;
 using RetailDemo.Models;
 
 namespace RetailDemo.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/order")]
     public class OrderController : ControllerBase
     {
@@ -17,6 +20,7 @@ namespace RetailDemo.Controllers
         [HttpPost]
         public IActionResult CreateOrder([FromBody] Order order)
         {
+            order.UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             order.OrderDate = DateTime.UtcNow;
             _context.Orders.Add(order);
             _context.SaveChanges();
