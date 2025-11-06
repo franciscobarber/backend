@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 // Use Azure SQL Database
 builder.Services.AddDbContext<RetailDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSql")));
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
