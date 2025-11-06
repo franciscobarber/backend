@@ -9,7 +9,6 @@ namespace RetailDemo.Data
 
         public DbSet<Product> Products { get; set; }
         public DbSet<InventoryItem> InventoryItems { get; set; }
-        public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Recommendation> Recommendations { get; set; }
 
