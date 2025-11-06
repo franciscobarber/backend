@@ -16,6 +16,12 @@ namespace RetailDemo.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Configure precision for decimal properties to avoid EF Core warnings
+            // and ensure data integrity for currency values.
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Price)
+                .HasColumnType("decimal(18,2)");
+
             // Define deterministic Guids for seed data
             var laptopId = Guid.Parse("9A477379-320D-4A43-A47B-3058887F5F3C");
             var headphonesId = Guid.Parse("AE80925F-441D-449A-A14A-528656594867");
