@@ -18,15 +18,6 @@ namespace RetailDemo.Models
         public Product Product { get; set; } = null!;
     }
 
-    public class CartItem
-    {
-        public Guid Id { get; set; }
-        public int Quantity { get; set; }
-
-        // Foreign Key to Product
-        public Guid ProductId { get; set; }
-        public Product Product { get; set; } = null!;
-    }
 
     public class Order
     {

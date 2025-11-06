@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using RetailDemo.Data;
+using RetailDemo.Dtos;
 using RetailDemo.Models;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RetailDemo.Controllers
@@ -11,10 +11,8 @@ namespace RetailDemo.Controllers
     [Route("api/cart")]
     public class CartController : ControllerBase
     {
-        // In-memory store for carts. Key: userId, Value: List of CartItem.
-        // This is static to persist across requests. A real implementation would use IMemoryCache or a distributed cache like Redis.
-        private static readonly ConcurrentDictionary<string, List<CartItem>> _carts = new ConcurrentDictionary<string, List<CartItem>>();
-
+        // In-memory store for carts. Key: userId, Value: <ProductId, Quantity>
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<System.Guid, int>> _carts = new ConcurrentDictionary<string, ConcurrentDictionary<System.Guid, int>>();
         // We are commenting out the DbContext as we are switching to an in-memory cache.
         // private readonly RetailDbContext _context;
 
@@ -26,25 +24,41 @@ namespace RetailDemo.Controllers
         [HttpGet("{userId}")]
         public IActionResult GetCartItems(string userId)
         {
-            if (!_carts.TryGetValue(userId, out var items))
+            if (!_carts.TryGetValue(userId, out var cart))
             {
-                items = new List<CartItem>();
+                // If the cart doesn't exist, return an empty list of items.
+                return Ok(new { items = new System.Collections.Generic.List<object>() });
             }
+
+            // Transform the dictionary into a list of objects for the frontend.
+            var items = cart.Select(item => new { productId = item.Key, quantity = item.Value }).ToList();
 
             return Ok(new { items }); // Match the structure the frontend expects
         }
 
         [HttpPost("{userId}/items")]
-        public IActionResult AddToCart(string userId, [FromBody] CartItem item)
+        public IActionResult AddToCart(string userId, [FromBody] AddToCartRequest request)
         {
-            var cart = _carts.GetOrAdd(userId, _ => new List<CartItem>());
+            if (request.Quantity <= 0)
+            {
+                return BadRequest("Quantity must be a positive number.");
+            }
 
-            // For simplicity, we'll just add the item. A real implementation
-            // would check if the product already exists and update the quantity.
-            item.Id = Guid.NewGuid(); // Assign a new ID for this cart item entry.
-            cart.Add(item);
+            var cart = _carts.GetOrAdd(userId, _ => new ConcurrentDictionary<System.Guid, int>());
 
-            return Ok(item);
+            cart.AddOrUpdate(request.ProductId, request.Quantity, (key, oldQuantity) => oldQuantity + request.Quantity);
+
+            return Ok(new { productId = request.ProductId, quantity = cart[request.ProductId] });
+        }
+
+        [HttpDelete("{userId}/items/{productId}")]
+        public IActionResult RemoveFromCart(string userId, System.Guid productId)
+        {
+            if (_carts.TryGetValue(userId, out var cart))
+            {
+                cart.TryRemove(productId, out _);
+            }
+            return NoContent(); // Indicate success with no content to return.
         }
     }
 }
