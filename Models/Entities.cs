@@ -25,6 +25,7 @@ public class Order
     public string? UserId { get; set; } // Add this property
     public DateTime OrderDate { get; set; }
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+    public string? CartId { get; set; }
 }
 
 public class OrderItem
