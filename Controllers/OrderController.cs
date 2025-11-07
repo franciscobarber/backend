@@ -39,7 +39,7 @@ namespace RetailDemo.Controllers
             var httpClient = _httpClientFactory.CreateClient();
             // In a real-world scenario, the base address would come from configuration
             httpClient.BaseAddress = new Uri($"{Request.Scheme}://{Request.Host}");
-
+            
             // 1. Check stock and hold items
             foreach (var item in order.OrderItems)
             {
