@@ -12,8 +12,8 @@ using RetailDemo.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(RetailDbContext))]
-    [Migration("20251107004527_ConfigurePricePrecision")]
-    partial class ConfigurePricePrecision
+    [Migration("20251107013959_ResolveErrors")]
+    partial class ResolveErrors
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,7 +75,7 @@ namespace backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
@@ -107,7 +107,7 @@ namespace backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18, 2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
