@@ -92,10 +92,17 @@ namespace RetailDemo.Controllers
             await _context.SaveChangesAsync();
 
             // 4. Empty the shopping cart
-            var cartResponse = await httpClient.DeleteAsync($"/api/cart/{userId}");
+            // Use the cartId from the order payload to clear the correct cart.
+            var cartIdToClear = order.CartId ?? userId;
+            if (string.IsNullOrEmpty(cartIdToClear))
+            {
+                _logger.LogWarning("No CartId or UserId available to clear the cart.");
+                return Ok(order);
+            }
+            var cartResponse = await httpClient.DeleteAsync($"/api/cart/{cartIdToClear}");
             if (!cartResponse.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Could not empty the cart for user {UserId} after order creation.", userId);
+                _logger.LogWarning("Could not empty the cart for user {UserId} after order creation.", cartIdToClear);
             }
 
             return Ok(order);
