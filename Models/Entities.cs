@@ -21,7 +21,7 @@ namespace RetailDemo.Models
 
 public class Order
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string? UserId { get; set; } // Add this property
     public DateTime OrderDate { get; set; }
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
@@ -29,12 +29,12 @@ public class Order
 
 public class OrderItem
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public int Quantity { get; set; }
     public decimal Price { get; set; }
 
     // Foreign Key to Order
-    public int OrderId { get; set; }
+    public Guid OrderId { get; set; }
     public Order Order { get; set; } = null!;
 
     // Foreign Key to Product

@@ -12,7 +12,7 @@ using RetailDemo.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(RetailDbContext))]
-    [Migration("20251105190544_InitialCreate")]
+    [Migration("20251107022256_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,25 +24,6 @@ namespace backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("RetailDemo.Models.CartItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("CartItems");
-                });
 
             modelBuilder.Entity("RetailDemo.Models.InventoryItem", b =>
                 {
@@ -60,27 +41,7 @@ namespace backend.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("InventoryItems");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("c9a5b9a7-5d1f-4b0e-9d2a-1b3e4c6f8a9b"),
-                            ProductId = new Guid("9a477379-320d-4a43-a47b-3058887f5f3c"),
-                            Stock = 10
-                        },
-                        new
-                        {
-                            Id = new Guid("d8b6c8b6-6e2f-4c1f-af3b-2c4f5d7e9b8d"),
-                            ProductId = new Guid("ae80925f-441d-449a-a14a-528656594867"),
-                            Stock = 50
-                        },
-                        new
-                        {
-                            Id = new Guid("e7c7d7c5-7f3f-4d2e-be4c-3d5e6f8dab7e"),
-                            ProductId = new Guid("f7317540-7a8c-49a9-9a3c-90a0e759a2d4"),
-                            Stock = 20
-                        });
+                    b.ToTable("Inventory");
                 });
 
             modelBuilder.Entity("RetailDemo.Models.Order", b =>
@@ -89,19 +50,42 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("RetailDemo.Models.OrderItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("RetailDemo.Models.Product", b =>
@@ -124,29 +108,6 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Products");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("9a477379-320d-4a43-a47b-3058887f5f3c"),
-                            Category = "Electronics",
-                            Name = "Laptop",
-                            Price = 1200m
-                        },
-                        new
-                        {
-                            Id = new Guid("ae80925f-441d-449a-a14a-528656594867"),
-                            Category = "Electronics",
-                            Name = "Headphones",
-                            Price = 150m
-                        },
-                        new
-                        {
-                            Id = new Guid("f7317540-7a8c-49a9-9a3c-90a0e759a2d4"),
-                            Category = "Home Appliances",
-                            Name = "Coffee Maker",
-                            Price = 80m
-                        });
                 });
 
             modelBuilder.Entity("RetailDemo.Models.Recommendation", b =>
@@ -165,7 +126,7 @@ namespace backend.Migrations
                     b.ToTable("Recommendations");
                 });
 
-            modelBuilder.Entity("RetailDemo.Models.CartItem", b =>
+            modelBuilder.Entity("RetailDemo.Models.InventoryItem", b =>
                 {
                     b.HasOne("RetailDemo.Models.Product", "Product")
                         .WithMany()
@@ -176,13 +137,21 @@ namespace backend.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("RetailDemo.Models.InventoryItem", b =>
+            modelBuilder.Entity("RetailDemo.Models.OrderItem", b =>
                 {
+                    b.HasOne("RetailDemo.Models.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("RetailDemo.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Order");
 
                     b.Navigation("Product");
                 });
@@ -196,6 +165,11 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("RetailDemo.Models.Order", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }

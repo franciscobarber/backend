@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace backend.Migrations
 {
     /// <inheritdoc />
@@ -18,9 +16,8 @@ namespace backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,26 +39,7 @@ namespace backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CartItems",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CartItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CartItems_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "InventoryItems",
+                name: "Inventory",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -70,9 +48,36 @@ namespace backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InventoryItems", x => x.Id);
+                    table.PrimaryKey("PK_Inventory", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InventoryItems_Products_ProductId",
+                        name: "FK_Inventory_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderItems",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -97,34 +102,19 @@ namespace backend.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Products",
-                columns: new[] { "Id", "Category", "Name", "Price" },
-                values: new object[,]
-                {
-                    { new Guid("9a477379-320d-4a43-a47b-3058887f5f3c"), "Electronics", "Laptop", 1200m },
-                    { new Guid("ae80925f-441d-449a-a14a-528656594867"), "Electronics", "Headphones", 150m },
-                    { new Guid("f7317540-7a8c-49a9-9a3c-90a0e759a2d4"), "Home Appliances", "Coffee Maker", 80m }
-                });
-
-            migrationBuilder.InsertData(
-                table: "InventoryItems",
-                columns: new[] { "Id", "ProductId", "Stock" },
-                values: new object[,]
-                {
-                    { new Guid("c9a5b9a7-5d1f-4b0e-9d2a-1b3e4c6f8a9b"), new Guid("9a477379-320d-4a43-a47b-3058887f5f3c"), 10 },
-                    { new Guid("d8b6c8b6-6e2f-4c1f-af3b-2c4f5d7e9b8d"), new Guid("ae80925f-441d-449a-a14a-528656594867"), 50 },
-                    { new Guid("e7c7d7c5-7f3f-4d2e-be4c-3d5e6f8dab7e"), new Guid("f7317540-7a8c-49a9-9a3c-90a0e759a2d4"), 20 }
-                });
-
             migrationBuilder.CreateIndex(
-                name: "IX_CartItems_ProductId",
-                table: "CartItems",
+                name: "IX_Inventory_ProductId",
+                table: "Inventory",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_InventoryItems_ProductId",
-                table: "InventoryItems",
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_ProductId",
+                table: "OrderItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
@@ -137,16 +127,16 @@ namespace backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CartItems");
+                name: "Inventory");
 
             migrationBuilder.DropTable(
-                name: "InventoryItems");
-
-            migrationBuilder.DropTable(
-                name: "Orders");
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "Recommendations");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Products");
