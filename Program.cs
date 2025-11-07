@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
-using Microsoft.OpenApi.Models;
-using Microsoft.IdentityModel.Validators; // Add this using directive
 using RetailDemo.Data;
 using RetailDemo.Models;
 
@@ -10,49 +8,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(
-        jwtOptions => // Configure JwtBearerOptions
-        {
-            builder.Configuration.Bind("AzureAd", jwtOptions);
-
-            // Explicitly configure TokenValidationParameters for multi-tenant issuer validation
-            jwtOptions.TokenValidationParameters.ValidateIssuer = true; // Ensure issuer validation is enabled
-
-            // Get the base Azure AD instance URL from configuration (e.g., "https://login.microsoftonline.com/")
-            var azureAdInstance = builder.Configuration["AzureAd:Instance"];
-            // Use AadIssuerValidator for multi-tenant scenarios to dynamically validate the issuer
-            jwtOptions.TokenValidationParameters.IssuerValidator =
-                AadIssuerValidator.GetAadIssuerValidator(azureAdInstance).Validate;
-        },
-        microsoftIdentityOptions => // Configure MicrosoftIdentityOptions
-        {
-            builder.Configuration.Bind("AzureAd", microsoftIdentityOptions);
-        });
+    // This is the simplest way to configure a multi-tenant app.
+    // Microsoft.Identity.Web will handle the issuer validation for "common", "organizations",
+    // and personal accounts based on your appsettings.json.
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 builder.Services.AddControllers();
 builder.WebHost.UseUrls("http://*:8080");
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSwaggerGen(c =>
-{
-    // Add JWT Bearer authentication to Swagger
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
-        {
-            new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
-            new string[] { }
-        }
-    });
-});
 
 // Use Azure SQL Database
 builder.Services.AddDbContext<RetailDbContext>(options =>
