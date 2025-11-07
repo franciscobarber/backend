@@ -36,11 +36,11 @@ public class OrderItem
 
     // Foreign Key to Order
     public Guid OrderId { get; set; }
-    public Order Order { get; set; } = null!;
+    public Order? Order { get; set; }
 
     // Foreign Key to Product
     public Guid ProductId { get; set; }
-    public Product Product { get; set; } = null!;
+    public Product? Product { get; set; }
 }
 
     public class Recommendation
