@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RetailDemo.Data;
-using System.ComponentModel.DataAnnotations;
+using RetailDemo.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace RetailDemo.Controllers
@@ -44,12 +44,5 @@ namespace RetailDemo.Controllers
 
             return NoContent();
         }
-    }
-
-    public class UpdateStockRequest
-    {
-        [Required]
-        [Range(0, int.MaxValue)]
-        public int Stock { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RetailDemo.Data;
 using RetailDemo.Dtos;
+using Microsoft.Extensions.Logging;
 using RetailDemo.Models;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -14,11 +15,13 @@ namespace RetailDemo.Controllers
         // In-memory store for carts. Key: userId, Value: <ProductId, Quantity>
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<System.Guid, int>> _carts = new ConcurrentDictionary<string, ConcurrentDictionary<System.Guid, int>>();
         // We are commenting out the DbContext as we are switching to an in-memory cache.
+        private readonly ILogger<CartController> _logger;
         // private readonly RetailDbContext _context;
 
-        public CartController(RetailDbContext context)
+        public CartController(ILogger<CartController> logger)
         {
             // _context = context;
+            _logger = logger;
         }
 
         [HttpGet("{userId}")]
@@ -59,6 +62,17 @@ namespace RetailDemo.Controllers
                 cart.TryRemove(productId, out _);
             }
             return NoContent(); // Indicate success with no content to return.
+        }
+
+        [HttpDelete("{userId}")]
+        public IActionResult ClearCart(string userId)
+        {
+            if (_carts.TryRemove(userId, out _))
+            {
+                _logger.LogInformation("Cart for user {UserId} cleared.", userId);
+            }
+
+            return NoContent();
         }
     }
 }
