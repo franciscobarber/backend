@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RetailDemo.Data;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace RetailDemo.Controllers
@@ -26,5 +27,29 @@ namespace RetailDemo.Controllers
             }
             return Ok(new { productId = item.ProductId, stock = item.Stock });
         }
+
+        [HttpPut("{productId}")]
+        public async Task<IActionResult> UpdateStock(Guid productId, [FromBody] UpdateStockRequest request)
+        {
+            var item = await _context.Inventory
+                .FirstOrDefaultAsync(i => i.ProductId == productId);
+
+            if (item == null)
+            {
+                return NotFound($"No inventory record found for product ID {productId}");
+            }
+
+            item.Stock = request.Stock;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+    }
+
+    public class UpdateStockRequest
+    {
+        [Required]
+        [Range(0, int.MaxValue)]
+        public int Stock { get; set; }
     }
 }
