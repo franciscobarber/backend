@@ -17,7 +17,7 @@ namespace RetailDemo.Controllers
         [HttpGet("{productId}")]
         public async Task<IActionResult> GetStock(Guid productId)
         {
-            var item = await _context.InventoryItems
+            var item = await _context.Inventory
                 .FirstOrDefaultAsync(i => i.ProductId == productId);
 
             if (item == null)
