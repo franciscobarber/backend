@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace RetailDemo.Models
 {
     public class Product
@@ -36,6 +38,7 @@ public class OrderItem
 
     // Foreign Key to Order
     public Guid OrderId { get; set; }
+    [JsonIgnore]
     public Order? Order { get; set; }
 
     // Foreign Key to Product
